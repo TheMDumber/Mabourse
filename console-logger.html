@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enregistreur de Console - Ma Bourse</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-top: 0;
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        button.record {
+            background-color: #dc2626;
+        }
+        button.record:hover {
+            background-color: #b91c1c;
+        }
+        button.record.recording {
+            background-color: #059669;
+        }
+        button.record.recording:hover {
+            background-color: #047857;
+        }
+        .log-container {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9fafb;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .log-entry.error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .log-entry.warn {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .log-entry.info {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        .log-entry.debug {
+            color: #4b5563;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #6b7280;
+            margin-right: 8px;
+        }
+        .no-logs {
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
+            padding: 20px;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .copy-area {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            font-family: monospace;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .status.info {
+            display: block;
+            background-color: #e0f2fe;
+            border: 1px solid #0ea5e9;
+        }
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enregistreur de Console - Ma Bourse</h1>
+        
+        <div class="status" id="statusBox">
+            <p>Cet outil vous permet d'enregistrer et de visualiser les messages de la console du navigateur pour faciliter le débogage.</p>
+        </div>
+
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" id="logError" checked>
+                <label for="logError">Erreurs</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="logWarn" checked>
+                <label for="logWarn">Avertissements</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="logInfo" checked>
+                <label for="logInfo">Informations</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="logDebug">
+                <label for="logDebug">Débug/Log</label>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="record" id="recordBtn">Démarrer l'enregistrement</button>
+            <button id="clearBtn">Effacer les logs</button>
+            <button id="copyBtn">Copier pour partage</button>
+            <button id="saveBtn">Télécharger en fichier</button>
+        </div>
+
+        <div class="log-container" id="logContainer">
+            <div class="no-logs" id="noLogsMessage">Aucun log enregistré. Cliquez sur "Démarrer l'enregistrement" et naviguez dans l'application.</div>
+        </div>
+        
+        <h2>Copier le texte formaté</h2>
+        <p>Utilisez cette zone pour copier les logs et les partager :</p>
+        <textarea id="copyArea" class="copy-area" readonly></textarea>
+    </div>
+
+    <script>
+        // Variables globales
+        let logs = [];
+        let isRecording = false;
+        const logContainer = document.getElementById('logContainer');
+        const recordBtn = document.getElementById('recordBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const noLogsMessage = document.getElementById('noLogsMessage');
+        const copyArea = document.getElementById('copyArea');
+        const statusBox = document.getElementById('statusBox');
+        
+        // Options de filtrage
+        const logError = document.getElementById('logError');
+        const logWarn = document.getElementById('logWarn');
+        const logInfo = document.getElementById('logInfo');
+        const logDebug = document.getElementById('logDebug');
+
+        // Fonction pour formater la date
+        function formatDate(date) {
+            return date.toLocaleTimeString('fr-FR', { hour12: false }) + '.' + 
+                   date.getMilliseconds().toString().padStart(3, '0');
+        }
+
+        // Fonction pour créer une entrée de log
+        function createLogEntry(logObject) {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${logObject.level}`;
+            
+            const timestamp = document.createElement('span');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = formatDate(logObject.timestamp);
+            
+            entry.appendChild(timestamp);
+            entry.appendChild(document.createTextNode(logObject.message));
+            
+            return entry;
+        }
+
+        // Fonction pour mettre à jour l'affichage des logs
+        function updateLogDisplay() {
+            // Effacer le contenu actuel
+            logContainer.innerHTML = '';
+            
+            // Filtrer les logs selon les options choisies
+            const filteredLogs = logs.filter(log => {
+                if (log.level === 'error' && !logError.checked) return false;
+                if (log.level === 'warn' && !logWarn.checked) return false;
+                if (log.level === 'info' && !logInfo.checked) return false;
+                if (log.level === 'debug' && !logDebug.checked) return false;
+                return true;
+            });
+            
+            // Afficher le message "pas de logs" si nécessaire
+            if (filteredLogs.length === 0) {
+                logContainer.appendChild(noLogsMessage);
+                return;
+            }
+            
+            // Ajouter chaque log filtré au conteneur
+            filteredLogs.forEach(log => {
+                logContainer.appendChild(createLogEntry(log));
+            });
+            
+            // Scroller vers le bas
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Mettre à jour la zone de copie
+            updateCopyArea(filteredLogs);
+        }
+        
+        // Fonction pour mettre à jour la zone de copie
+        function updateCopyArea(filteredLogs) {
+            const formattedText = filteredLogs.map(log => {
+                return `[${formatDate(log.timestamp)}] [${log.level.toUpperCase()}] ${log.message}`;
+            }).join('\n');
+            
+            copyArea.value = formattedText;
+        }
+
+        // Fonction pour gérer le début et l'arrêt de l'enregistrement
+        function toggleRecording() {
+            if (isRecording) {
+                // Arrêter l'enregistrement
+                isRecording = false;
+                recordBtn.textContent = 'Démarrer l\'enregistrement';
+                recordBtn.classList.remove('recording');
+                
+                // Restaurer les fonctions originales
+                console.error = originalConsole.error;
+                console.warn = originalConsole.warn;
+                console.info = originalConsole.info;
+                console.log = originalConsole.log;
+                
+                statusBox.className = 'status info';
+                statusBox.innerHTML = '<p>Enregistrement arrêté. Vous pouvez maintenant copier ou télécharger les logs.</p>';
+            } else {
+                // Démarrer l'enregistrement
+                isRecording = true;
+                recordBtn.textContent = 'Arrêter l\'enregistrement';
+                recordBtn.classList.add('recording');
+                
+                statusBox.className = 'status info';
+                statusBox.innerHTML = '<p>Enregistrement en cours... Naviguez dans l\'application pour capturer les logs.</p>';
+                
+                // Remplacer les fonctions de console
+                console.error = function() {
+                    const message = Array.from(arguments).map(arg => {
+                        if (typeof arg === 'object') {
+                            try {
+                                return JSON.stringify(arg);
+                            } catch (e) {
+                                return String(arg);
+                            }
+                        }
+                        return String(arg);
+                    }).join(' ');
+                    
+                    logs.push({
+                        timestamp: new Date(),
+                        level: 'error',
+                        message: message
+                    });
+                    
+                    updateLogDisplay();
+                    originalConsole.error.apply(console, arguments);
+                };
+                
+                console.warn = function() {
+                    const message = Array.from(arguments).map(arg => String(arg)).join(' ');
+                    logs.push({
+                        timestamp: new Date(),
+                        level: 'warn',
+                        message: message
+                    });
+                    
+                    updateLogDisplay();
+                    originalConsole.warn.apply(console, arguments);
+                };
+                
+                console.info = function() {
+                    const message = Array.from(arguments).map(arg => String(arg)).join(' ');
+                    logs.push({
+                        timestamp: new Date(),
+                        level: 'info',
+                        message: message
+                    });
+                    
+                    updateLogDisplay();
+                    originalConsole.info.apply(console, arguments);
+                };
+                
+                console.log = function() {
+                    const message = Array.from(arguments).map(arg => String(arg)).join(' ');
+                    logs.push({
+                        timestamp: new Date(),
+                        level: 'debug',
+                        message: message
+                    });
+                    
+                    updateLogDisplay();
+                    originalConsole.log.apply(console, arguments);
+                };
+            }
+        }
+
+        // Fonction pour effacer les logs
+        function clearLogs() {
+            logs = [];
+            updateLogDisplay();
+            
+            statusBox.className = 'status info';
+            statusBox.innerHTML = '<p>Tous les logs ont été effacés.</p>';
+            
+            // Masquer le message après quelques secondes
+            setTimeout(() => {
+                statusBox.className = 'status';
+            }, 3000);
+        }
+
+        // Fonction pour copier les logs
+        function copyLogs() {
+            copyArea.select();
+            document.execCommand('copy');
+            
+            statusBox.className = 'status info';
+            statusBox.innerHTML = '<p>Les logs ont été copiés dans le presse-papiers.</p>';
+            
+            // Masquer le message après quelques secondes
+            setTimeout(() => {
+                statusBox.className = 'status';
+            }, 3000);
+        }
+
+        // Fonction pour télécharger les logs
+        function saveLogs() {
+            const formattedText = logs.map(log => {
+                return `[${formatDate(log.timestamp)}] [${log.level.toUpperCase()}] ${log.message}`;
+            }).join('\n');
+            
+            const blob = new Blob([formattedText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            const date = new Date();
+            const fileName = `mabourse_logs_${date.toLocaleDateString('fr-FR').replace(/\//g, '-')}_${date.toLocaleTimeString('fr-FR', { hour12: false }).replace(/:/g, '-')}.txt`;
+            
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            statusBox.className = 'status info';
+            statusBox.innerHTML = `<p>Les logs ont été téléchargés sous le nom "${fileName}".</p>`;
+            
+            // Masquer le message après quelques secondes
+            setTimeout(() => {
+                statusBox.className = 'status';
+            }, 3000);
+        }
+
+        // Sauvegarder les fonctions originales de la console
+        const originalConsole = {
+            error: console.error,
+            warn: console.warn,
+            info: console.info,
+            log: console.log
+        };
+
+        // Événements des boutons
+        recordBtn.addEventListener('click', toggleRecording);
+        clearBtn.addEventListener('click', clearLogs);
+        copyBtn.addEventListener('click', copyLogs);
+        saveBtn.addEventListener('click', saveLogs);
+        
+        // Événements des filtres
+        logError.addEventListener('change', updateLogDisplay);
+        logWarn.addEventListener('change', updateLogDisplay);
+        logInfo.addEventListener('change', updateLogDisplay);
+        logDebug.addEventListener('change', updateLogDisplay);
+        
+        // Initialiser l'affichage
+        updateLogDisplay();
+    </script>
+</body>
+</html>
