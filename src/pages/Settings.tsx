@@ -160,8 +160,8 @@ const Settings = () => {
             options.targetAccountId = parseInt(selectedImportAccount);
           }
           
-          // Importer les données avec les options personnalisées
-          const success = await importData(jsonData, options);
+          // Importer les données avec les options personnalisées et forcer la mise à jour de l'UI
+          const success = await importData(jsonData, options, true);
           
           if (success) {
             setImportDialogOpen(false);
@@ -191,6 +191,17 @@ const Settings = () => {
             // Recharger les comptes après l'importation
             const updatedAccounts = await db.accounts.getAll();
             setAccounts(updatedAccounts);
+            
+            // Forcer la mise à jour de l'UI complète via React Query
+            try {
+              const { queryClient } = await import('@/lib/queryConfig');
+              if (queryClient) {
+                // Invalider toutes les requêtes pour forcer un rafraîchissement complet
+                queryClient.invalidateQueries();
+              }
+            } catch (e) {
+              console.error('Erreur lors de la mise à jour de l\'UI:', e);
+            }
           } else {
             throw new Error("Échec de l'importation");
           }

@@ -1,5 +1,8 @@
 /* Styles pour améliorer l'expérience mobile - Design inspiré des applications bancaires modernes */
 
+/* Import des variables CSS globales */
+@import './variables.css';
+
 :root {
   /* Palette de couleurs douces pour mobile */
   --mobile-primary: #4F46E5;       /* Violet doux */
@@ -32,12 +35,12 @@
   [class*="card-"],
   .container-mobile {
     background-color: var(--mobile-surface);
-    border-radius: 16px !important;
+    border-radius: var(--radius-2xl) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
-    margin-bottom: 16px !important;
-    padding: 16px !important;
+    margin-bottom: var(--space-4) !important;
+    padding: var(--space-4) !important;
     border: none !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   }
 
   /* Effet d'élévation au toucher */
@@ -50,23 +53,23 @@
 
   /* Typographie améliorée */
   h1, .h1 {
-    font-size: 1.5rem !important;
-    font-weight: 700 !important;
-    margin-bottom: 1rem !important;
+    font-size: var(--text-2xl) !important;
+    font-weight: var(--font-bold) !important;
+    margin-bottom: var(--space-4) !important;
     color: var(--mobile-text) !important;
   }
 
   h2, .h2 {
-    font-size: 1.25rem !important;
-    font-weight: 600 !important;
-    margin-bottom: 0.75rem !important;
+    font-size: var(--text-xl) !important;
+    font-weight: var(--font-semibold) !important;
+    margin-bottom: var(--space-3) !important;
     color: var(--mobile-text) !important;
   }
 
   h3, .h3 {
-    font-size: 1.125rem !important;
-    font-weight: 600 !important;
-    margin-bottom: 0.5rem !important;
+    font-size: var(--text-lg) !important;
+    font-weight: var(--font-semibold) !important;
+    margin-bottom: var(--space-2) !important;
     color: var(--mobile-text) !important;
   }
 
@@ -82,12 +85,12 @@
   a,
   select,
   .select-trigger {
-    min-height: 48px !important;
-    min-width: 48px !important;
-    padding: 0.75rem 1rem !important;
-    border-radius: 12px !important;
-    font-weight: 500 !important;
-    transition: background 0.2s ease, transform 0.1s ease !important;
+    min-height: 3rem !important;
+    min-width: 3rem !important;
+    padding: var(--space-3) var(--space-4) !important;
+    border-radius: var(--radius-xl) !important;
+    font-weight: var(--font-medium) !important;
+    transition: background var(--transition-fast), transform 0.1s ease !important;
   }
 
   /* Boutons primaires */
@@ -116,14 +119,14 @@
 
   /* Champs de formulaire */
   input, select, textarea {
-    font-size: 16px !important; /* Éviter le zoom sur iOS */
-    padding: 0.85rem 1rem !important;
-    border-radius: 12px !important;
+    font-size: var(--text-base) !important; /* Éviter le zoom sur iOS */
+    padding: var(--space-3) var(--space-4) !important;
+    border-radius: var(--radius-xl) !important;
     border: 1.5px solid var(--mobile-border) !important;
     background-color: var(--mobile-surface) !important;
     width: 100% !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast) !important;
   }
 
   input:focus, select:focus, textarea:focus {
@@ -134,22 +137,22 @@
 
   /* Labels de formulaire */
   label {
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
+    font-size: var(--text-sm) !important;
+    font-weight: var(--font-medium) !important;
     color: var(--mobile-text-secondary) !important;
-    margin-bottom: 0.5rem !important;
+    margin-bottom: var(--space-2) !important;
     display: block !important;
   }
 
   /* Modales améliorées */
   [role="dialog"] {
     max-width: 100% !important;
-    width: calc(100% - 32px) !important;
-    margin: 16px !important;
-    border-radius: 20px !important;
+    width: calc(100% - 2rem) !important;
+    margin: var(--space-4) !important;
+    border-radius: var(--radius-3xl) !important;
     background-color: var(--mobile-surface) !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
-    animation: modal-slide-up 0.3s ease-out !important;
+    box-shadow: var(--shadow-xl) !important;
+    animation: modal-slide-up var(--animation-duration-normal) var(--animation-easing-decelerate) !important;
   }
 
   @keyframes modal-slide-up {
@@ -164,8 +167,8 @@
   }
 
   [role="dialog"] h2 {
-    font-size: 1.25rem !important;
-    font-weight: 600 !important;
+    font-size: var(--text-xl) !important;
+    font-weight: var(--font-semibold) !important;
     color: var(--mobile-text) !important;
   }
 
@@ -183,15 +186,15 @@
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    height: 64px !important;
+    height: 4rem !important;
     background-color: var(--mobile-surface) !important;
     display: flex !important;
     justify-content: space-around !important;
     align-items: center !important;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05) !important;
-    z-index: 100 !important;
-    border-top-left-radius: 20px !important;
-    border-top-right-radius: 20px !important;
+    z-index: var(--z-fixed) !important;
+    border-top-left-radius: var(--radius-3xl) !important;
+    border-top-right-radius: var(--radius-3xl) !important;
   }
 
   .bottom-nav-item {
@@ -200,10 +203,10 @@
     align-items: center !important;
     justify-content: center !important;
     flex: 1 !important;
-    padding: 8px 0 !important;
+    padding: var(--space-2) 0 !important;
     color: var(--mobile-text-secondary) !important;
-    font-size: 0.75rem !important;
-    transition: color 0.2s ease !important;
+    font-size: var(--text-xs) !important;
+    transition: color var(--transition-fast) !important;
   }
 
   .bottom-nav-item.active {
@@ -211,12 +214,12 @@
   }
 
   .bottom-nav-item svg {
-    margin-bottom: 4px !important;
+    margin-bottom: var(--space-1) !important;
   }
 
   /* Ajustement du contenu principal avec bottom-bar */
   .bottom-nav-padding {
-    padding-bottom: 74px !important; /* 64px + 10px buffer */
+    padding-bottom: 4.5rem !important; /* 4rem + padding */
   }
 
   /* Tableaux responsives */
@@ -224,7 +227,7 @@
     width: 100% !important;
     display: block !important;
     overflow-x: auto !important;
-    border-radius: 10px !important;
+    border-radius: var(--radius-lg) !important;
     border-collapse: separate !important;
     border-spacing: 0 !important;
     border: 1px solid var(--mobile-border) !important;
@@ -233,24 +236,24 @@
   table th {
     background-color: rgba(0, 0, 0, 0.02) !important;
     text-align: left !important;
-    font-weight: 600 !important;
-    padding: 12px !important;
-    font-size: 0.875rem !important;
+    font-weight: var(--font-semibold) !important;
+    padding: var(--space-3) !important;
+    font-size: var(--text-sm) !important;
     color: var(--mobile-text-secondary) !important;
   }
 
   table td {
-    padding: 12px !important;
+    padding: var(--space-3) !important;
     border-top: 1px solid var(--mobile-border) !important;
-    font-size: 0.875rem !important;
+    font-size: var(--text-sm) !important;
   }
 
   /* Notifications et badges */
   .badge {
-    padding: 0.25rem 0.5rem !important;
-    border-radius: 999px !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
+    padding: var(--space-1) var(--space-2) !important;
+    border-radius: var(--radius-full) !important;
+    font-size: var(--text-xs) !important;
+    font-weight: var(--font-semibold) !important;
   }
 
   .badge-primary {
@@ -271,14 +274,14 @@
   /* Icônes plus visibles */
   svg, 
   img[role="img"] {
-    min-width: 22px !important;
-    min-height: 22px !important;
+    min-width: 1.375rem !important;
+    min-height: 1.375rem !important;
   }
 
   /* Balances et montants */
   .balance-large {
-    font-size: 1.75rem !important;
-    font-weight: 700 !important;
+    font-size: var(--text-3xl) !important;
+    font-weight: var(--font-bold) !important;
     color: var(--mobile-text) !important;
   }
 
@@ -296,11 +299,11 @@
   .chart-container {
     width: 100% !important;
     height: auto !important;
-    min-height: 250px !important;
-    border-radius: 16px !important;
+    min-height: 15.625rem !important;
+    border-radius: var(--radius-2xl) !important;
     overflow: hidden !important;
     background-color: var(--mobile-surface) !important;
-    padding: 16px !important;
+    padding: var(--space-4) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   }
 }

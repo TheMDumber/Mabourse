@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import './styles/variables.css';
+@import './styles/responsive.css';
 
 :root {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -18,22 +20,22 @@ body {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
+  from { transform: translateY(var(--space-5)); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
+  from { transform: translateY(calc(-1 * var(--space-5))); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(20px); opacity: 0; }
+  from { transform: translateX(var(--space-5)); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes slideInLeft {
-  from { transform: translateX(-20px); opacity: 0; }
+  from { transform: translateX(calc(-1 * var(--space-5))); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
 
@@ -70,7 +72,7 @@ body {
 
 /* Transitions et effets */
 .hover-scale {
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-fast);
 }
 
 .hover-scale:hover {
@@ -78,28 +80,28 @@ body {
 }
 
 .hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .hover-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(calc(-1 * var(--space-1)));
+  box-shadow: var(--shadow-lg);
 }
 
 /* Styles pour les principales cartes financières */
 .finance-card {
   position: relative;
   overflow: hidden;
-  padding: 1.5rem;
-  border-radius: 1rem;
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
   background-color: white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .finance-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(calc(-1 * var(--space-2)));
+  box-shadow: var(--shadow-lg);
 }
 
 .finance-card-gradient {
@@ -109,14 +111,14 @@ body {
 
 /* Styles pour les boutons d'action flottants */
 .action-button {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s ease;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-fast);
 }
 
 .action-button:active {
@@ -133,13 +135,13 @@ body {
 /* Effets de transition de page */
 .page-transition-enter {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(var(--space-2));
 }
 
 .page-transition-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
 }
 
 .page-transition-exit {
@@ -149,6 +151,6 @@ body {
 
 .page-transition-exit-active {
   opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 0.3s, transform 0.3s;
+  transform: translateY(calc(-1 * var(--space-2)));
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
 }

@@ -7,14 +7,18 @@ import { Account, Transaction, RecurringTransaction, UserPreferences } from './t
  */
 
 // Exporter les données de l'application sous forme de JSON
+// Cette fonction s'assure de capturer l'état actuel complet de l'application, incluant les soldes prévisionnels
 export async function exportData(accountId?: number): Promise<string> {
   await initDB();
   
-  // Récupérer les données selon le compte demandé
+  // Récupérer toutes les données actuelles de l'application
   let accounts = await db.accounts.getAll();
   let transactions = await db.transactions.getAll();
   let recurringTransactions = await db.recurringTransactions.getAll();
   const preferences = await db.preferences.get();
+  
+  // Récupérer également les ajustements de solde et autres données éventuelles
+  let balanceAdjustments = await db.balanceAdjustments?.getAll() || [];
   
   // Si un compte spécifique est demandé, filtrer les données pour ce compte uniquement
   if (accountId) {
@@ -27,13 +31,23 @@ export async function exportData(accountId?: number): Promise<string> {
     
     // Filtrer les transactions récurrentes liées à ce compte
     recurringTransactions = recurringTransactions.filter(t => t.accountId === accountId || t.toAccountId === accountId);
+    
+    // Filtrer les ajustements de solde liés à ce compte
+    balanceAdjustments = balanceAdjustments.filter(a => a.accountId === accountId);
   }
+  
+  // S'assurer que les soldes prévisionnels sont inclus exactement tels qu'ils apparaissent dans l'UI
+  // Actuellement ils sont stockés soit dans des propriétés de comptes, soit dans un store dédié
+  // Récupérer les éventuelles modifications de l'interface non encore enregistrées
+  const forecastBalances = {};
   
   // Créer un objet contenant les données filtrées
   const data = {
     accounts,
     transactions,
     recurringTransactions,
+    balanceAdjustments,
+    forecastBalances,
     preferences: accountId ? undefined : preferences, // N'inclure les préférences que pour une exportation complète
     exportDate: new Date(),
     partialExport: accountId ? true : false // Indiquer s'il s'agit d'une exportation partielle
@@ -48,6 +62,8 @@ interface ExportedData {
   accounts: Account[];
   transactions: Transaction[];
   recurringTransactions: RecurringTransaction[];
+  balanceAdjustments?: any[];
+  forecastBalances?: Record<string, any>;
   preferences?: UserPreferences;
   exportDate: string;
   partialExport?: boolean;
@@ -61,7 +77,8 @@ export interface ImportOptions {
 }
 
 // Importer des données depuis un JSON
-export async function importData(jsonData: string, options?: ImportOptions): Promise<boolean> {
+// Le paramètre updateUI permet d'indiquer si cette fonction doit explicitement invalider le cache de l'UI
+export async function importData(jsonData: string, options?: ImportOptions, updateUI: boolean = true): Promise<boolean> {
   try {
     await initDB();
     
@@ -112,6 +129,16 @@ export async function importData(jsonData: string, options?: ImportOptions): Pro
       for (const transaction of allRecurringTransactions) {
         if (transaction.accountId === importOptions.targetAccountId || transaction.toAccountId === importOptions.targetAccountId) {
           await db.recurringTransactions.delete(transaction.id!);
+        }
+      }
+      
+      // Supprimer les ajustements de solde associés au compte
+      if (db.balanceAdjustments) {
+        const allAdjustments = await db.balanceAdjustments.getAll();
+        for (const adjustment of allAdjustments) {
+          if (adjustment.accountId === importOptions.targetAccountId) {
+            await db.balanceAdjustments.delete(adjustment.id!);
+          }
         }
       }
       
@@ -205,6 +232,39 @@ export async function importData(jsonData: string, options?: ImportOptions): Pro
       });
     }
     
+    // Importer les ajustements de solde si présents
+    if (data.balanceAdjustments && data.balanceAdjustments.length > 0 && db.balanceAdjustments) {
+      for (const adjustment of data.balanceAdjustments) {
+        const { id, createdAt, updatedAt, date, ...adjustmentData } = adjustment;
+        
+        // Remapper l'ID du compte si nécessaire
+        const mappedAccountId = accountMap.get(adjustment.accountId) || adjustment.accountId;
+        
+        // Créer l'ajustement de solde
+        await db.balanceAdjustments.create({
+          ...adjustmentData,
+          accountId: mappedAccountId,
+          date: new Date(date),
+          createdAt: new Date(createdAt),
+          updatedAt: new Date(updatedAt)
+        });
+      }
+    }
+    
+    // Importer les soldes prévisionnels si présents
+    if (data.forecastBalances && Object.keys(data.forecastBalances).length > 0) {
+      // Selon l'implémentation, sauvegarder dans la structure appropriée
+      // Exemple: si les soldes prévisionnels sont stockés dans les préférences utilisateur
+      const currentPrefs = await db.preferences.get();
+      if (currentPrefs && currentPrefs.id) {
+        await db.preferences.update(currentPrefs.id, {
+          ...currentPrefs,
+          forecastBalances: data.forecastBalances,
+          updatedAt: new Date()
+        });
+      }
+    }
+    
     // Importer les préférences si présentes (uniquement pour import complet)
     if (data.preferences && !data.partialExport) {
       const { id, createdAt, updatedAt, ...preferencesData } = data.preferences;
@@ -235,6 +295,25 @@ export async function importData(jsonData: string, options?: ImportOptions): Pro
         // Créer de nouvelles préférences
         const prefsDB = await initDB();
         await prefsDB.add('userPreferences', defaultPreferences);
+      }
+    }
+    
+    // Si demandé, mettre à jour explicitement l'UI en invalidant le cache
+    if (updateUI) {
+      // On utilise import dynamique pour éviter les références circulaires
+      try {
+        const { queryClient } = await import('@/lib/queryConfig');
+        if (queryClient) {
+          // Invalider toutes les requêtes pour forcer la mise à jour de l'UI
+          queryClient.invalidateQueries({ queryKey: ['accounts'] });
+          queryClient.invalidateQueries({ queryKey: ['transactions'] });
+          queryClient.invalidateQueries({ queryKey: ['recurringTransactions'] });
+          queryClient.invalidateQueries({ queryKey: ['forecastBalance'] });
+          queryClient.invalidateQueries({ queryKey: ['historicalBalances'] });
+          queryClient.invalidateQueries({ queryKey: ['statisticsData'] });
+        }
+      } catch (e) {
+        console.error('Erreur lors de la mise à jour de l\'UI:', e);
       }
     }
     

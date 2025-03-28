@@ -58,8 +58,8 @@ Les composants UI utilisent:
 - [x] Identifier les patterns architecturaux (React avec contextes et hooks)
 
 ### Phase 2: Vérification des tâches existantes
-- [x] Rechercher tout fichier TODO.md ou similaire (aucun trouvé)
-- [x] Créer le fichier TODO.md à la racine du projet
+- [x] Rechercher tout fichier TODO.md ou similaire (trouvé et analysé)
+- [x] Analyser les tâches non terminées listées dans le fichier TODO.md existant
 
 ### Phase 3: Analyse fonctionnelle
 - [x] Examiner les modules principaux et leurs dépendances
@@ -67,15 +67,25 @@ Les composants UI utilisent:
 - [x] Identifier les potentielles failles de sécurité
 - [x] Détecter les antipatterns et pratiques non optimales
 - [x] Vérifier la couverture de tests (absente)
+- [x] Analyser les axes d'amélioration spécifiques (CSS, JavaScript, structure du projet)
 
 ### Phase 4: Documentation structurée
 - [x] Créer ce fichier TODO.md à la racine du projet
 - [x] Compléter la documentation de l'architecture générale
 - [x] Documenter les problèmes identifiés
 - [x] Établir une liste des optimisations recommandées
-- [ ] Mettre en place un suivi de l'état d'avancement des modifications
+- [x] Mettre en place un suivi de l'état d'avancement des modifications
 
 ## Problèmes identifiés
+
+### Nouvelles observations basées sur les axes d'amélioration
+- [x] Design responsive incomplet - absence de media queries pour l'adaptation aux différents appareils
+- [ ] Structure de code JavaScript avec variables et fonctions globales potentiellement problématiques
+- [x] Utilisation de valeurs en pixels pour les styles CSS plutôt que des unités relatives (rem/em)
+- [x] Absence de variables CSS pour les couleurs et autres valeurs réutilisables
+- [ ] Sélection multiple des mêmes éléments DOM dans le code JavaScript
+- [ ] Manipulation potentiellement non sécurisée du DOM (innerHTML vs textContent)
+- [ ] Utilisation de var au lieu de let/const
 
 ### Gestion des erreurs
 - [ ] Manque de gestion d'erreurs cohérente à travers l'application
@@ -108,6 +118,15 @@ Les composants UI utilisent:
 
 ## Optimisations recommandées
 
+### Nouvelles optimisations suggérées
+- [x] Améliorer la responsivité en ajoutant des media queries et en utilisant Flexbox/Grid
+- [x] Remplacer les unités px par des unités relatives (rem/em) pour l'accessibilité
+- [x] Définir des variables CSS pour les couleurs et autres propriétés réutilisables
+- [ ] Optimiser les sélections DOM en stockant les références dans des variables
+- [ ] Sécuriser les manipulations du DOM en utilisant textContent ou createElement
+- [ ] Utiliser 'use strict' dans les fichiers JavaScript
+- [ ] Remplacer var par let/const selon les besoins
+
 ### À court terme
 - [ ] Améliorer la gestion des erreurs par un système centralisé de log et notification
 - [ ] Optimiser la logique de synchronisation pour réduire le volume de données
@@ -134,6 +153,8 @@ Les composants UI utilisent:
 
 ## Tâches prioritaires
 
+### Tâches existantes
+
 1. [x] Corriger l'erreur de connexion à l'API (port 5173 vs 3001)
 2. [x] Améliorer la gestion des erreurs de connexion au serveur
 3. [x] Implémentation de vérifications proactives de disponibilité du serveur
@@ -147,3 +168,23 @@ Les composants UI utilisent:
 6. [ ] Mettre en place des tests unitaires pour les fonctions critiques
 7. [ ] Restructurer l'organisation des composants
 8. [ ] Améliorer les performances des requêtes à la base de données
+
+### Nouvelles tâches basées sur les axes d'amélioration
+
+9. [x] CSS et Responsivité
+   - [x] Ajouter des media queries pour l'adaptation aux différents appareils
+   - [x] Remplacer les unités px par rem/em pour une meilleure accessibilité
+   - [x] Créer des variables CSS pour les couleurs et valeurs répétées
+   - [x] Utiliser Flexbox et Grid pour une mise en page plus robuste
+
+10. [ ] Optimisations JavaScript
+    - [ ] Encapsuler le code JavaScript dans des IIFE ou modules ES6
+    - [ ] Ajouter 'use strict' au début des fichiers
+    - [ ] Remplacer var par let/const
+    - [ ] Optimiser les sélections DOM avec des références stockées
+    - [ ] Sécuriser les manipulations DOM (textContent vs innerHTML)
+
+11. [ ] Documentation et organisation
+    - [ ] Vérifier et mettre à jour le README.md si nécessaire
+    - [ ] Mettre à jour le .gitignore avec des motifs additionnels
+    - [ ] Ajouter des commentaires explicatifs dans les parties complexes du code
