@@ -18,7 +18,7 @@ export async function exportData(accountId?: number): Promise<string> {
   const preferences = await db.preferences.get();
   
   // Récupérer également les ajustements de solde et autres données éventuelles
-  let balanceAdjustments = await db.balanceAdjustments?.getAll() || [];
+  let balanceAdjustments = await db.balanceAdjustments.getAll();
   
   // Si un compte spécifique est demandé, filtrer les données pour ce compte uniquement
   if (accountId) {
@@ -235,19 +235,32 @@ export async function importData(jsonData: string, options?: ImportOptions, upda
     // Importer les ajustements de solde si présents
     if (data.balanceAdjustments && data.balanceAdjustments.length > 0 && db.balanceAdjustments) {
       for (const adjustment of data.balanceAdjustments) {
-        const { id, createdAt, updatedAt, date, ...adjustmentData } = adjustment;
-        
-        // Remapper l'ID du compte si nécessaire
-        const mappedAccountId = accountMap.get(adjustment.accountId) || adjustment.accountId;
-        
-        // Créer l'ajustement de solde
-        await db.balanceAdjustments.create({
-          ...adjustmentData,
-          accountId: mappedAccountId,
-          date: new Date(date),
-          createdAt: new Date(createdAt),
-          updatedAt: new Date(updatedAt)
-        });
+        try {
+          const { id, createdAt, updatedAt, date, ...adjustmentData } = adjustment;
+          
+          // Remapper l'ID du compte si nécessaire
+          const mappedAccountId = accountMap.get(adjustment.accountId) || adjustment.accountId;
+          
+          // Au lieu d'utiliser create qui échoue à cause de la contrainte d'unicité,
+          // on va d'abord vérifier si un ajustement existe déjà pour ce compte/mois
+          const existing = await db.balanceAdjustments.getByAccountAndMonth(mappedAccountId, adjustment.yearMonth);
+          
+          if (existing) {
+            // Si un ajustement existe déjà, on le supprime d'abord
+            await db.balanceAdjustments.deleteAdjustment(mappedAccountId, adjustment.yearMonth);
+          }
+          
+          // Puis on crée un nouvel ajustement
+          await db.balanceAdjustments.setAdjustment({
+            ...adjustmentData,
+            accountId: mappedAccountId,
+            date: new Date(date),
+            // Les champs createdAt et updatedAt sont gérés par setAdjustment
+          });
+        } catch (error) {
+          console.warn(`Erreur lors de l'importation d'un ajustement de solde:`, error);
+          // Continuer malgré l'erreur pour ne pas bloquer l'importation complète
+        }
       }
     }
     
@@ -304,13 +317,19 @@ export async function importData(jsonData: string, options?: ImportOptions, upda
       try {
         const { queryClient } = await import('@/lib/queryConfig');
         if (queryClient) {
-          // Invalider toutes les requêtes pour forcer la mise à jour de l'UI
-          queryClient.invalidateQueries({ queryKey: ['accounts'] });
-          queryClient.invalidateQueries({ queryKey: ['transactions'] });
-          queryClient.invalidateQueries({ queryKey: ['recurringTransactions'] });
-          queryClient.invalidateQueries({ queryKey: ['forecastBalance'] });
-          queryClient.invalidateQueries({ queryKey: ['historicalBalances'] });
-          queryClient.invalidateQueries({ queryKey: ['statisticsData'] });
+          console.log('Invalidation des requêtes après importation...');
+          
+          // Utiliser resetQueries qui est plus efficace que invalidateQueries
+          // pour forcer un remontage complet des composants
+          queryClient.resetQueries({ queryKey: ['accounts'] });
+          queryClient.resetQueries({ queryKey: ['transactions'] });
+          queryClient.resetQueries({ queryKey: ['recurringTransactions'] });
+          queryClient.resetQueries({ queryKey: ['balanceAdjustments'] }); 
+          queryClient.resetQueries({ queryKey: ['forecastBalance'] });
+          queryClient.resetQueries({ queryKey: ['historicalBalances'] });
+          queryClient.resetQueries({ queryKey: ['statistics'] });
+          
+          console.log('Invalidation des requêtes terminée');
         }
       } catch (e) {
         console.error('Erreur lors de la mise à jour de l\'UI:', e);

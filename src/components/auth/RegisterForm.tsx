@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { fileStorage } from '@/lib/fileStorageAdapter';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import db from '@/lib/db';
 import { Currency, Theme } from '@/lib/types';
 
@@ -36,6 +36,8 @@ interface RegisterFormProps {
 export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Initialiser le formulaire
   const form = useForm<z.infer<typeof formSchema>>({
@@ -117,7 +119,7 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
                 <FormItem>
                   <FormLabel>Nom d'utilisateur</FormLabel>
                   <FormControl>
-                    <Input {...field} autoComplete="username" />
+                    <Input {...field} id={field.name} autoComplete="username" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -131,7 +133,26 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
                 <FormItem>
                   <FormLabel>Mot de passe</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" autoComplete="new-password" />
+                    <div className="relative">
+                      <Input 
+                        {...field} 
+                        id={field.name}
+                        type={showPassword ? "text" : "password"} 
+                        autoComplete="new-password" 
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,7 +166,26 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
                 <FormItem>
                   <FormLabel>Confirmer le mot de passe</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" autoComplete="new-password" />
+                    <div className="relative">
+                      <Input 
+                        {...field} 
+                        id={field.name}
+                        type={showConfirmPassword ? "text" : "password"} 
+                        autoComplete="new-password" 
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

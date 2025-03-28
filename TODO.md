@@ -155,6 +155,18 @@ Les composants UI utilisent:
 
 ### Tâches existantes
 
+12. [x] Améliorer les formulaires d'authentification
+    - [x] Ajouter une icône œil pour afficher/masquer le mot de passe dans le formulaire de connexion
+    - [x] Ajouter une icône œil pour afficher/masquer le mot de passe dans le formulaire d'inscription
+    - [x] Corriger les attributs `id` et `for` pour l'accessibilité et l'auto-remplissage des formulaires
+
+13. [x] Correction de bugs
+    - [x] Corriger l'erreur d'exportation des données: "TypeError: db.balanceAdjustments?.getAll is not a function"
+    - [x] Corriger l'erreur d'importation des données: "TypeError: db.balanceAdjustments.create is not a function"
+    - [x] Corriger l'erreur de contrainte d'unicité lors de l'importation des ajustements de solde
+    - [x] Améliorer la mise à jour automatique de l'interface après importation pour éviter le F5
+
+=======
 1. [x] Corriger l'erreur de connexion à l'API (port 5173 vs 3001)
 2. [x] Améliorer la gestion des erreurs de connexion au serveur
 3. [x] Implémentation de vérifications proactives de disponibilité du serveur

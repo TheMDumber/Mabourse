@@ -108,8 +108,9 @@ export async function fixBalanceAdjustmentsStore(): Promise<boolean> {
             updatedAt: new Date()
           };
           
-          const tx = db.transaction('userPreferences', 'readwrite');
-          tx.store.add(defaultPreferences);
+          // Ajouter les préférences par défaut directement dans la transaction de mise à niveau
+          // plutôt que créer une nouvelle transaction
+          preferencesStore.add(defaultPreferences);
           
           console.log('Store userPreferences créé avec succès');
         }

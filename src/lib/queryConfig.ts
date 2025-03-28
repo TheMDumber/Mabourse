@@ -78,6 +78,13 @@ export const createOptimizedQueryClient = (): QueryClient => {
 };
 
 /**
+ * Instance globale du client React Query pour les mises à jour en dehors des composants React
+ */
+export const queryClient = new QueryClient({
+  defaultOptions: queryConfig
+});
+
+/**
  * Clés de requête pour organiser le cache
  * Utiliser ces clés pour assurer la cohérence des invalidations
  */

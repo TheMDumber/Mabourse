@@ -196,11 +196,25 @@ const Settings = () => {
             try {
               const { queryClient } = await import('@/lib/queryConfig');
               if (queryClient) {
-                // Invalider toutes les requêtes pour forcer un rafraîchissement complet
-                queryClient.invalidateQueries();
+                console.log('Mise à jour de l\'UI après importation...');
+                
+                // Invalider toutes les requêtes importantes avec plus de précision
+                queryClient.resetQueries({ queryKey: ['accounts'] });
+                queryClient.resetQueries({ queryKey: ['transactions'] });
+                queryClient.resetQueries({ queryKey: ['recurringTransactions'] });
+                queryClient.resetQueries({ queryKey: ['balanceAdjustments'] });
+                queryClient.resetQueries({ queryKey: ['statistics'] });
+                
+                // Forcer un rafraîchissement de la page actuelle après un court délai
+                // pour s'assurer que toutes les invalidations ont eu le temps de se propager
+                setTimeout(() => {
+                  window.location.reload();
+                }, 500);
               }
             } catch (e) {
               console.error('Erreur lors de la mise à jour de l\'UI:', e);
+              // En cas d'erreur, forcer un rafraîchissement de la page
+              window.location.reload();
             }
           } else {
             throw new Error("Échec de l'importation");

@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { fileStorage } from '@/lib/fileStorageAdapter';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { ServerStatusAlert } from '@/components/ui/server-status-alert';
 import { checkServerAvailable } from '@/lib/serverCheck';
 
@@ -32,6 +32,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [serverAvailable, setServerAvailable] = useState<boolean | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
   // Vérifier la disponibilité du serveur au chargement
@@ -138,7 +139,7 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
                 <FormItem>
                   <FormLabel>Nom d'utilisateur</FormLabel>
                   <FormControl>
-                    <Input {...field} autoComplete="username" />
+                    <Input {...field} id={field.name} autoComplete="username" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -152,7 +153,26 @@ export function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
                 <FormItem>
                   <FormLabel>Mot de passe</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" autoComplete="current-password" />
+                    <div className="relative">
+                      <Input 
+                        {...field} 
+                        id={field.name}
+                        type={showPassword ? "text" : "password"} 
+                        autoComplete="current-password" 
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

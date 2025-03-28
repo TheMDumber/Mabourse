@@ -641,6 +641,25 @@ export const preferencesAPI = {
 
 // API de gestion des ajustements de solde
 export const balanceAdjustmentsAPI = {
+  // Récupérer tous les ajustements
+  async getAll(): Promise<BalanceAdjustment[]> {
+    await initDB();
+    
+    // Vérifier d'abord si l'object store existe
+    const storeExists = await objectStoreExists('balanceAdjustments');
+    if (!storeExists) {
+      console.warn('L\'object store balanceAdjustments n\'existe pas lors de la récupération de tous les ajustements');
+      return []; // Retourner un tableau vide si l'object store n'existe pas
+    }
+    
+    try {
+      return await db.getAll('balanceAdjustments');
+    } catch (error) {
+      console.error('Erreur lors de la récupération de tous les ajustements:', error);
+      return [];
+    }
+  },
+
   // Récupérer un ajustement pour un compte et un mois spécifique
   async getByAccountAndMonth(accountId: number, yearMonth: string): Promise<BalanceAdjustment | null> {
     await initDB();
@@ -659,6 +678,25 @@ export const balanceAdjustmentsAPI = {
     } catch (error) {
       console.error('Erreur lors de la récupération de l\'ajustement:', error);
       return null; // Retourner null en cas d'erreur
+    }
+  },
+
+  // Créer un nouvel ajustement de solde
+  async create(adjustment: Omit<BalanceAdjustment, 'id'>): Promise<number> {
+    await initDB();
+    
+    // Vérifier d'abord si l'object store existe
+    const storeExists = await objectStoreExists('balanceAdjustments');
+    if (!storeExists) {
+      console.warn('L\'object store balanceAdjustments n\'existe pas lors de la création d\'un ajustement');
+      throw new Error('L\'object store balanceAdjustments n\'existe pas');
+    }
+    
+    try {
+      return await db.add('balanceAdjustments', adjustment);
+    } catch (error) {
+      console.error('Erreur lors de la création d\'un ajustement de solde:', error);
+      throw error;
     }
   },
 
